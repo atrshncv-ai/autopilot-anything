@@ -1,0 +1,703 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Autopilot Anything · Run dashboard</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #eef3f3;
+      --surface: #ffffff;
+      --surface-soft: #f6f9f8;
+      --ink: #172d34;
+      --muted: #62757b;
+      --line: #d4e0df;
+      --teal: #176c69;
+      --teal-soft: #e8f4f1;
+      --amber: #99611b;
+      --amber-soft: #fff5e5;
+      --red: #9c4540;
+      --red-soft: #fff0ee;
+      --shadow: 0 8px 24px rgb(21 48 51 / 5%);
+      --radius: 12px;
+    }
+    body[data-theme="dark"] {
+      color-scheme: dark;
+      --paper: #142326;
+      --surface: #1d3033;
+      --surface-soft: #22373a;
+      --ink: #e9f0ed;
+      --muted: #a5b8b7;
+      --line: #3b5354;
+      --teal: #78c4b4;
+      --teal-soft: #233e3d;
+      --amber: #e8bc76;
+      --amber-soft: #453a28;
+      --red: #f0a39d;
+      --red-soft: #482f30;
+      --shadow: 0 8px 24px rgb(0 0 0 / 14%);
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        color-scheme: dark;
+        --paper: #142326;
+        --surface: #1d3033;
+        --surface-soft: #22373a;
+        --ink: #e9f0ed;
+        --muted: #a5b8b7;
+        --line: #3b5354;
+        --teal: #78c4b4;
+        --teal-soft: #233e3d;
+        --amber: #e8bc76;
+        --amber-soft: #453a28;
+        --red: #f0a39d;
+        --red-soft: #482f30;
+        --shadow: 0 8px 24px rgb(0 0 0 / 14%);
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font: 14px/1.5 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    button, input, select { font: inherit; }
+    button, select, input { color: inherit; }
+    button:focus-visible, select:focus-visible, input:focus-visible, a:focus-visible, summary:focus-visible {
+      outline: 3px solid color-mix(in srgb, var(--teal) 44%, transparent);
+      outline-offset: 2px;
+    }
+    .shell { width: min(100%, 1060px); margin: 0 auto; padding: 20px 18px 40px; }
+    .topbar { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; margin-bottom: 16px; }
+    .brand { min-width: 0; }
+    .eyebrow { margin: 0 0 4px; color: var(--teal); font-size: 10px; font-weight: 750; letter-spacing: .13em; text-transform: uppercase; }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 { margin-bottom: 2px; overflow-wrap: anywhere; font-size: clamp(20px, 4vw, 27px); letter-spacing: -.035em; line-height: 1.2; }
+    h2 { margin-bottom: 12px; font-size: 15px; letter-spacing: -.012em; }
+    h3 { margin: 0; font-size: 13px; line-height: 1.35; }
+    .subline, .muted, .meta { color: var(--muted); }
+    .subline { margin: 0; font-size: 12px; overflow-wrap: anywhere; }
+    .toolbar { display: flex; flex: 0 0 auto; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
+    .tool-button {
+      min-height: 34px; border: 1px solid var(--line); border-radius: 8px; padding: 5px 9px;
+      background: var(--surface); cursor: pointer; font-size: 12px; font-weight: 650;
+    }
+    .tool-button:hover { border-color: var(--teal); }
+    .connection-line { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
+    .connection {
+      display: inline-flex; align-items: center; gap: 7px; min-height: 28px; border: 1px solid var(--line);
+      border-radius: 8px; padding: 3px 9px; background: var(--surface); color: var(--muted); font-size: 11px; font-weight: 650;
+    }
+    .connection::before { width: 7px; height: 7px; border-radius: 50%; background: var(--amber); content: ""; }
+    .connection.connected::before { background: var(--teal); }
+    .connection.disconnected { border-color: color-mix(in srgb, var(--amber) 45%, var(--line)); color: var(--amber); }
+    .last-poll { margin: 0; color: var(--muted); font-size: 11px; text-align: right; }
+    .notice { border: 1px solid var(--line); border-left: 3px solid var(--amber); border-radius: 8px; margin-bottom: 12px; padding: 8px 10px; background: var(--amber-soft); color: var(--ink); font-size: 12px; }
+    .notice[hidden] { display: none; }
+    .notice.error { border-left-color: var(--red); background: var(--red-soft); }
+    .hero { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(220px, 1fr); gap: 12px; margin-bottom: 12px; }
+    .panel { min-width: 0; border: 1px solid var(--line); border-radius: var(--radius); padding: 15px; background: var(--surface); box-shadow: var(--shadow); }
+    .summary { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+    .summary-copy { min-width: 0; }
+    .summary-copy p:last-child { margin-bottom: 0; }
+    .badge { display: inline-flex; align-items: center; min-height: 23px; border: 1px solid var(--line); border-radius: 7px; padding: 2px 7px; background: var(--surface-soft); color: var(--muted); font-size: 10px; font-weight: 700; white-space: nowrap; }
+    .badge.active, .badge.completed, .badge.satisfied, .badge.passed { border-color: color-mix(in srgb, var(--teal) 40%, var(--line)); background: var(--teal-soft); color: var(--teal); }
+    .badge.waiting, .badge.pending, .badge.deferred, .badge.not-run { border-color: color-mix(in srgb, var(--amber) 35%, var(--line)); background: var(--amber-soft); color: var(--amber); }
+    .badge.failed, .badge.blocked, .badge.cancelled { border-color: color-mix(in srgb, var(--red) 35%, var(--line)); background: var(--red-soft); color: var(--red); }
+    .progress-block { margin-top: 14px; }
+    .progress-heading { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 6px; font-size: 11px; }
+    .progress-heading strong { font-size: 12px; }
+    .progress-track { height: 7px; overflow: hidden; border-radius: 99px; background: var(--surface-soft); }
+    .progress-fill { width: 0; height: 100%; border-radius: inherit; background: var(--teal); transition: width .22s ease; }
+    .stats { display: flex; flex-wrap: wrap; gap: 17px; margin-top: 13px; }
+    .stat strong { display: block; font-variant-numeric: tabular-nums; font-size: 17px; line-height: 1.2; }
+    .stat span { color: var(--muted); font-size: 10px; }
+    .settings { display: grid; grid-template-columns: 1fr 1fr; gap: 9px 12px; }
+    .setting { min-width: 0; border-bottom: 1px dashed var(--line); padding-bottom: 5px; }
+    .setting span { display: block; color: var(--muted); font-size: 9px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+    .setting strong { display: block; overflow-wrap: anywhere; font-size: 12px; font-weight: 620; }
+    .waiting-panel, .completion-panel { margin-bottom: 12px; border-left: 3px solid var(--amber); }
+    .waiting-panel[hidden], .completion-panel[hidden] { display: none; }
+    .completion-panel { border-left-color: var(--teal); }
+    .waiting-panel h2, .completion-panel h2 { margin-bottom: 4px; }
+    .columns { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+    .rows { display: grid; gap: 0; }
+    .row { display: flex; justify-content: space-between; align-items: flex-start; gap: 9px; border-bottom: 1px solid var(--line); padding: 9px 0; }
+    .row:first-child { padding-top: 0; }
+    .row:last-child { border-bottom: 0; padding-bottom: 0; }
+    .row-main { min-width: 0; overflow-wrap: anywhere; }
+    .row-main .meta { margin-top: 3px; }
+    .meta { font-size: 11px; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .empty { margin: 0; color: var(--muted); font-size: 12px; }
+    .gates { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin-top: 11px; }
+    .gate { min-width: 0; border: 1px dashed var(--line); border-radius: 8px; padding: 7px 4px; text-align: center; }
+    .gate strong, .gate span { display: block; overflow-wrap: anywhere; }
+    .gate strong { font-size: 11px; }
+    .gate span { margin-top: 2px; color: var(--muted); font-size: 9px; }
+    .stage-time { display: block; margin-top: 2px; color: var(--muted); font-size: 10px; }
+    .filterbar { display: flex; gap: 6px; margin: -2px 0 9px; }
+    .filterbar input, .filterbar select { min-width: 0; height: 32px; border: 1px solid var(--line); border-radius: 7px; padding: 4px 7px; background: var(--surface-soft); font-size: 11px; }
+    .filterbar input { flex: 1; }
+    .filterbar select { flex: 0 0 auto; max-width: 45%; }
+    .requirement { border-bottom: 1px solid var(--line); padding: 8px 0; }
+    .requirement:first-child { padding-top: 0; }
+    .requirement:last-child { border-bottom: 0; padding-bottom: 0; }
+    .requirement summary { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; cursor: pointer; list-style: none; }
+    .requirement summary::-webkit-details-marker { display: none; }
+    .req-title { min-width: 0; overflow-wrap: anywhere; font-size: 12px; font-weight: 650; }
+    .req-id { display: inline-block; margin-right: 5px; color: var(--muted); font-size: 10px; font-weight: 600; }
+    .req-details { margin: 7px 0 0; padding-left: 9px; border-left: 2px solid var(--line); }
+    .req-details p { margin: 0 0 4px; font-size: 11px; overflow-wrap: anywhere; }
+    .artifact-path { display: inline-block; border: 1px solid var(--line); border-radius: 5px; padding: 1px 5px; color: var(--teal); font: 10px/1.6 ui-monospace, SFMono-Regular, Menlo, monospace; overflow-wrap: anywhere; }
+    .artifact-list { display: grid; gap: 6px; }
+    .event-time { flex: 0 0 auto; color: var(--muted); font-size: 9px; text-align: right; }
+    .footer-note { margin: 4px 1px 0; color: var(--muted); font-size: 10px; }
+    @media (max-width: 700px) {
+      .shell { padding: 13px 11px 26px; }
+      .topbar { display: block; }
+      .toolbar { justify-content: flex-start; margin-top: 10px; }
+      .hero, .columns { grid-template-columns: 1fr; }
+      .connection-line { align-items: flex-start; flex-direction: column; }
+      .last-poll { text-align: left; }
+    }
+    @media (max-width: 440px) {
+      .shell { padding-right: 9px; padding-left: 9px; }
+      .panel { padding: 12px; }
+      .settings { grid-template-columns: 1fr 1fr; gap: 7px; }
+      .stats { gap: 12px; }
+      .gates { gap: 4px; }
+      .gate { padding-right: 2px; padding-left: 2px; }
+      .filterbar { flex-direction: column; }
+      .filterbar select { max-width: none; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+<main class="shell">
+  <header class="topbar">
+    <div class="brand">
+      <p class="eyebrow" data-i18n="brand">Autopilot Anything · Run dashboard</p>
+      <h1 id="title">Autopilot run</h1>
+      <p id="run-id" class="subline"></p>
+    </div>
+    <nav class="toolbar" aria-label="Dashboard display preferences">
+      <button class="tool-button" type="button" data-action="refresh" data-i18n="refresh" aria-label="Refresh run state">Refresh</button>
+      <button class="tool-button" type="button" data-action="language" data-lang="en" aria-label="Change language">EN</button>
+      <button class="tool-button" type="button" data-action="theme" aria-label="Change color theme">Theme</button>
+    </nav>
+  </header>
+
+  <div class="connection-line">
+    <div id="connection" class="connection" role="status" aria-live="polite">Snapshot · waiting for live update</div>
+    <p id="last-poll" class="last-poll"></p>
+  </div>
+  <div id="connection-detail" class="notice" role="status" aria-live="polite" hidden></div>
+  <div id="stale-note" class="notice" role="status" aria-live="polite" hidden></div>
+
+  <section class="hero" aria-label="Run overview">
+    <div class="panel">
+      <div class="summary">
+        <div class="summary-copy">
+          <p class="eyebrow" data-i18n="currentState">Current state</p>
+          <p id="checkpoint" class="subline"></p>
+        </div>
+        <span id="run-status" class="badge">active</span>
+      </div>
+      <div class="progress-block">
+        <div class="progress-heading"><strong data-i18n="progress">Workflow progress</strong><span id="progress-label" class="muted">0%</span></div>
+        <div id="progress" class="progress-track" role="progressbar" aria-label="Workflow progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="progress-fill" class="progress-fill"></div></div>
+        <p id="progress-detail" class="meta"></p>
+      </div>
+      <div class="stats">
+        <div class="stat"><strong id="elapsed">0m</strong><span data-i18n="workingTime">working time</span></div>
+        <div class="stat"><strong id="waiting-time">0m</strong><span data-i18n="waitingTime">waiting time</span></div>
+        <div class="stat"><strong id="revision">0</strong><span data-i18n="revision">revision</span></div>
+      </div>
+    </div>
+    <div class="panel">
+      <h2 data-i18n="runSettings">Run settings</h2>
+      <div id="run-settings" class="settings"></div>
+    </div>
+  </section>
+
+  <section id="waiting-panel" class="panel waiting-panel" aria-live="polite" hidden>
+    <p class="eyebrow" data-i18n="waitingForUser">Waiting for user</p>
+    <h2 id="waiting-reason"></h2>
+    <p id="waiting-since" class="meta"></p>
+  </section>
+  <section id="completion-panel" class="panel completion-panel" hidden>
+    <p class="eyebrow" data-i18n="runFinished">Run finished</p>
+    <h2 id="completion-status"></h2>
+    <p id="completion-summary" class="meta"></p>
+  </section>
+
+  <section class="columns">
+    <div class="panel">
+      <h2 data-i18n="stagesGates">Stages and gates</h2>
+      <div id="stages" class="rows"></div>
+      <div id="gates" class="gates"></div>
+    </div>
+    <div class="panel">
+      <h2 data-i18n="requirements">Requirements</h2>
+      <div class="filterbar">
+        <input id="requirement-search" type="search" data-i18n-placeholder="searchRequirements" placeholder="Search requirements" aria-label="Search requirements">
+        <select id="requirement-filter" aria-label="Filter requirements">
+          <option value="all" data-i18n="allRequirements">All requirements</option>
+          <option value="open" data-i18n="openRequirements">Open</option>
+          <option value="closed" data-i18n="closedRequirements">Addressed</option>
+        </select>
+      </div>
+      <div id="requirements" class="rows"></div>
+    </div>
+  </section>
+  <section class="columns">
+    <div class="panel"><h2 data-i18n="workItems">Work items</h2><div id="work-items" class="rows"></div></div>
+    <div class="panel"><h2 data-i18n="checks">Checks</h2><div id="checks" class="rows"></div></div>
+  </section>
+  <section class="columns">
+    <div class="panel"><h2 data-i18n="artifacts">Artifacts</h2><div id="artifacts" class="artifact-list"></div></div>
+    <div class="panel"><h2 data-i18n="activity">Recent activity</h2><div id="activity" class="rows"></div></div>
+  </section>
+  <p class="footer-note" data-i18n="readOnly">Read-only view · state is updated by the Autopilot run.</p>
+</main>
+
+<script id="initial-state" type="application/json">{{STATE_JSON}}</script>
+<script>
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const strings = {
+    en: {
+      brand: 'Autopilot Anything · Run dashboard', refresh: 'Refresh', currentState: 'Current state', progress: 'Workflow progress',
+      workingTime: 'working time', waitingTime: 'waiting time', revision: 'revision', runSettings: 'Run settings',
+      waitingForUser: 'Waiting for user', runFinished: 'Run finished', stagesGates: 'Stages and gates', requirements: 'Requirements',
+      workItems: 'Work items', checks: 'Checks', artifacts: 'Artifacts', activity: 'Recent activity', readOnly: 'Read-only view · state is updated by the Autopilot run.',
+      searchRequirements: 'Search requirements', allRequirements: 'All requirements', openRequirements: 'Open', closedRequirements: 'Addressed',
+      mode: 'Mode', depth: 'Depth', complexity: 'Complexity', risk: 'Risk', route: 'Route', updated: 'State updated', stageTime: 'Stage time',
+      snapshotWaiting: 'Snapshot · waiting for live update', snapshot: 'Snapshot · live updates unavailable', live: 'Live updates connected',
+      lastChecked: 'Checked', lastState: 'Last state change', refreshFailed: 'Showing the saved snapshot. It may be stale; live updates are unavailable.',
+      quietState: 'No run-state change for a while. Check the last update time.', empty: 'Nothing recorded yet.', noActivity: 'No activity recorded yet.',
+      noRequirements: 'No requirements recorded yet.', noMatches: 'No requirements match this filter.', noArtifacts: 'No output artifacts recorded yet.',
+      routeNotSelected: 'Not selected', ready: 'Ready', notTracked: 'No work items or checks recorded yet.',
+      trackedClosed: '{done} of {total} tracked elements resolved', stageTimeValue: 'Active for {duration}',
+      stageTimeUnavailable: 'Duration unavailable',
+      waitingSince: 'Waiting since {time}', stateTitle: 'Run {id}', stage: 'Stage', artifactFrom: 'From {name}',
+      status: {active:'Active', waiting:'Waiting', completed:'Completed', failed:'Failed', blocked:'Blocked', pending:'Pending', passed:'Passed', satisfied:'Satisfied', deferred:'Deferred', 'not-run':'Not run', skipped:'Skipped', 'in-progress':'In progress', 'not-applicable':'Not applicable', cancelled:'Cancelled'},
+      modeValues: {full:'Full', semi:'Semi', interview:'Interview', manual:'Manual'},
+      depthValues: {strict:'Strict', normal:'Normal', deep:'Deep'},
+      complexityValues: {simple:'Simple', medium:'Medium', complex:'Complex'},
+      riskValues: {low:'Low', medium:'Medium', high:'High', critical:'Critical', unknown:'Unknown'},
+      theme: 'Theme', language: 'Language', progressBar: 'Workflow progress'
+    },
+    ru: {
+      brand: 'Autopilot Anything · Состояние прогона', refresh: 'Обновить', currentState: 'Состояние', progress: 'Ход работы',
+      workingTime: 'рабочее время', waitingTime: 'ожидание', revision: 'версия', runSettings: 'Параметры прогона',
+      waitingForUser: 'Ожидание ответа', runFinished: 'Прогон завершён', stagesGates: 'Этапы и гейты', requirements: 'Требования',
+      workItems: 'Рабочие пункты', checks: 'Проверки', artifacts: 'Материалы', activity: 'Последние события', readOnly: 'Только просмотр · состояние обновляет Autopilot.',
+      searchRequirements: 'Найти требование', allRequirements: 'Все требования', openRequirements: 'Открытые', closedRequirements: 'Закрытые',
+      mode: 'Режим', depth: 'Глубина', complexity: 'Сложность', risk: 'Риск', route: 'Маршрут', updated: 'Состояние обновлено', stageTime: 'Время этапа',
+      snapshotWaiting: 'Снимок · ждём live-обновления', snapshot: 'Снимок · live-обновление недоступно', live: 'Связь активна',
+      lastChecked: 'Проверено', lastState: 'Последнее изменение', refreshFailed: 'Показан снимок, он может быть устаревшим. Live-обновление недоступно.',
+      quietState: 'Состояние прогона давно не менялось. Проверьте время последнего обновления.', empty: 'Пока нет записей.', noActivity: 'Событий пока нет.',
+      noRequirements: 'Требований пока нет.', noMatches: 'Нет требований по этому фильтру.', noArtifacts: 'Итоговые материалы пока не указаны.',
+      routeNotSelected: 'Не выбран', ready: 'Готово', notTracked: 'Рабочие пункты и проверки ещё не добавлены.',
+      trackedClosed: 'Обработано элементов состояния: {done} из {total}', stageTimeValue: 'Активен {duration}',
+      stageTimeUnavailable: 'Длительность недоступна',
+      waitingSince: 'Ожидание с {time}', stateTitle: 'Прогон {id}', stage: 'Этап', artifactFrom: 'Из: {name}',
+      status: {active:'В работе', waiting:'Ожидание', completed:'Завершено', failed:'Ошибка', blocked:'Заблокировано', pending:'Ожидает', passed:'Пройдена', satisfied:'Выполнено', deferred:'Отложено', 'not-run':'Не запускалась', skipped:'Пропущено', 'in-progress':'В работе', 'not-applicable':'Не применимо', cancelled:'Отменён'},
+      modeValues: {full:'Полный', semi:'Полуавтоматический', interview:'Интервью', manual:'Ручной'},
+      depthValues: {strict:'Строгая', normal:'Обычная', deep:'Глубокая'},
+      complexityValues: {simple:'Низкая', medium:'Средняя', complex:'Высокая'},
+      riskValues: {low:'Низкий', medium:'Средний', high:'Высокий', critical:'Критический', unknown:'Не оценён'},
+      theme: 'Тема', language: 'Язык', progressBar: 'Ход работы'
+    }
+  };
+  let language = 'en';
+  let themePreference = 'auto';
+  let current = JSON.parse($('initial-state').textContent);
+  let lastCheckedAt = null;
+  let refreshRunning = false;
+  const safeStatuses = new Set(['active','waiting','completed','failed','blocked','pending','passed','satisfied','deferred','not-run','skipped','in-progress','not-applicable','cancelled']);
+  const text = (tag, value, className) => {
+    const element = document.createElement(tag);
+    element.textContent = value == null ? '' : String(value);
+    if (className) element.className = className;
+    return element;
+  };
+  const clear = id => { const element = $(id); element.replaceChildren(); return element; };
+  const tr = (key) => strings[language][key] || strings.en[key] || key;
+  const interpolate = (value, values) => String(value).replace(/\{(\w+)\}/g, (_, key) => values[key] == null ? '' : String(values[key]));
+  const statusLabel = value => {
+    const safe = safeStatuses.has(value) ? value : 'pending';
+    return strings[language].status[safe] || strings.en.status[safe] || safe;
+  };
+  const badge = value => {
+    const safe = safeStatuses.has(value) ? value : 'pending';
+    return text('span', statusLabel(safe), 'badge ' + safe);
+  };
+  const setText = (id, value) => { $(id).textContent = value == null ? '' : String(value); };
+  const formatDuration = seconds => {
+    const amount = Math.max(0, Math.floor(Number(seconds) || 0));
+    const minutes = Math.floor(amount / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+    if (language === 'ru') {
+      if (days) return days + ' д ' + (hours % 24) + ' ч';
+      if (hours) return hours + ' ч ' + (minutes % 60) + ' мин';
+      return minutes + ' мин';
+    }
+    if (days) return days + 'd ' + (hours % 24) + 'h';
+    if (hours) return hours + 'h ' + (minutes % 60) + 'm';
+    return minutes + 'm';
+  };
+  const formatDate = value => {
+    if (!value) return '—';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return String(value);
+    try { return new Intl.DateTimeFormat(language === 'ru' ? 'ru-RU' : 'en', {dateStyle:'medium', timeStyle:'short'}).format(date); }
+    catch (_) { return date.toISOString(); }
+  };
+  const parseDate = value => {
+    const result = Date.parse(value || '');
+    return Number.isFinite(result) ? result : null;
+  };
+  const elapsedSeconds = state => {
+    let seconds = Math.max(0, Number(state.elapsed_seconds) || 0);
+    if (state.status === 'active' && state.updated_at) {
+      const lastChange = parseDate(state.updated_at);
+      if (lastChange !== null) seconds += Math.max(0, Math.floor((Date.now() - lastChange) / 1000));
+    }
+    return seconds;
+  };
+  const totalWaitingSeconds = state => (Array.isArray(state.waiting_intervals) ? state.waiting_intervals : []).reduce((total, interval) => {
+    const duration = Math.max(0, Number(interval.duration_seconds) || 0);
+    if (interval.ended_at || !interval.started_at) return total + duration;
+    const started = parseDate(interval.started_at);
+    return total + duration + (started === null ? 0 : Math.max(0, Math.floor((Date.now() - started) / 1000)));
+  }, 0);
+  const stageStart = (state, stage) => {
+    const checkpoint = state.checkpoint || {};
+    if (checkpoint.stage === stage.id && state.current_stage_started_at) return state.current_stage_started_at;
+    const history = Array.isArray(state.events) ? state.events : [];
+    for (let index = history.length - 1; index >= 0; index -= 1) {
+      const event = history[index];
+      if (event.type === 'stage' && event.id === stage.id && ['active','waiting'].includes(event.status)) return event.timestamp;
+    }
+    return null;
+  };
+  const stageDuration = (state, stage) => {
+    const started = parseDate(stageStart(state, stage));
+    if (started === null) return null;
+    const finishAt = state.completed_at ? parseDate(state.completed_at) : Date.now();
+    if (finishAt === null) return null;
+    let elapsed = Math.max(0, Math.floor((finishAt - started) / 1000));
+    for (const interval of Array.isArray(state.waiting_intervals) ? state.waiting_intervals : []) {
+      const waitStart = parseDate(interval.started_at);
+      const waitEnd = interval.ended_at ? parseDate(interval.ended_at) : (state.status === 'waiting' ? Date.now() : finishAt);
+      if (waitStart !== null && waitEnd !== null) elapsed -= Math.max(0, Math.floor((Math.min(finishAt, waitEnd) - Math.max(started, waitStart)) / 1000));
+    }
+    return Math.max(0, elapsed);
+  };
+  const closedStatuses = new Set(['completed','satisfied','deferred','not-applicable','passed','skipped']);
+  const progressValue = state => {
+    const collections = [state.stages, state.requirements, state.work_items, state.checks];
+    const records = collections.flatMap(value => Array.isArray(value) ? value : []);
+    const gateValues = Object.values(state.gates || {});
+    const total = records.length + gateValues.length;
+    const done = records.filter(record => closedStatuses.has(record.status)).length + gateValues.filter(gate => closedStatuses.has(gate.status)).length;
+    if (!total) return {percent: state.status === 'completed' ? 100 : 0, done:0, total:0};
+    return {percent: Math.round(done / total * 100), done, total};
+  };
+  const settingValue = (key, value) => {
+    const map = {mode:'modeValues', depth:'depthValues', complexity:'complexityValues', risk:'riskValues'};
+    if (map[key]) return strings[language][map[key]][value] || value || '—';
+    if (key === 'route' && !value) return tr('routeNotSelected');
+    return value == null || value === '' ? '—' : value;
+  };
+  const row = (title, detail, status) => {
+    const container = text('div', null, 'row');
+    const main = text('div', null, 'row-main');
+    main.appendChild(text('h3', title || '—'));
+    if (detail) main.appendChild(text('div', detail, 'meta'));
+    container.appendChild(main);
+    if (status) container.appendChild(badge(status));
+    return container;
+  };
+  const renderStages = state => {
+    const container = clear('stages');
+    const gates = clear('gates');
+    const stages = Array.isArray(state.stages) ? state.stages : [];
+    if (!stages.length) container.appendChild(text('p', tr('empty'), 'empty'));
+    else stages.forEach(stage => {
+        const entry = row(stage.label || stage.id, null, stage.status);
+        const isCurrent = stage.status === 'active' || (state.status === 'waiting' && stage.id === (state.checkpoint || {}).stage);
+        if (isCurrent) {
+          const duration = stageDuration(state, stage);
+          const label = duration === null ? tr('stageTimeUnavailable') : interpolate(tr('stageTimeValue'), {duration:formatDuration(duration)});
+          entry.querySelector('.row-main').appendChild(text('span', label, 'stage-time'));
+        }
+        container.appendChild(entry);
+      });
+    ['G1','G2','G3','G4'].forEach(id => {
+      const gateState = state.gates && state.gates[id] || {};
+      const cell = text('div', null, 'gate');
+      cell.appendChild(text('strong', id));
+      cell.appendChild(text('span', statusLabel(gateState.status || 'pending')));
+      gates.appendChild(cell);
+    });
+  };
+  const renderRequirements = state => {
+    const container = clear('requirements');
+    const all = Array.isArray(state.requirements) ? state.requirements : [];
+    const query = $('requirement-search').value.trim().toLocaleLowerCase(language === 'ru' ? 'ru-RU' : 'en');
+    const filter = $('requirement-filter').value;
+    if (!all.length) { container.appendChild(text('p', tr('noRequirements'), 'empty')); return; }
+    const visible = all.filter(item => {
+      const isClosed = closedStatuses.has(item.status);
+      const matchesStatus = filter === 'all' || (filter === 'closed' ? isClosed : !isClosed);
+      const haystack = [item.id,item.text,item.source,item.rationale,item.artifact].filter(Boolean).join(' ').toLocaleLowerCase(language === 'ru' ? 'ru-RU' : 'en');
+      return matchesStatus && (!query || haystack.includes(query));
+    });
+    if (!visible.length) { container.appendChild(text('p', tr('noMatches'), 'empty')); return; }
+    visible.forEach(item => {
+      const details = document.createElement('details');
+      details.className = 'requirement';
+      const summary = document.createElement('summary');
+      const title = text('span', null, 'req-title');
+      title.appendChild(text('span', item.id || '', 'req-id'));
+      title.appendChild(document.createTextNode(item.text || '—'));
+      summary.appendChild(title);
+      summary.appendChild(badge(item.status));
+      details.appendChild(summary);
+      const body = text('div', null, 'req-details');
+      [['source', item.source], ['rationale', item.rationale], ['artifact', item.artifact]].forEach(([label, value]) => {
+        if (!value) return;
+        const line = text('p', null);
+        line.appendChild(text('strong', label + ': '));
+        line.appendChild(document.createTextNode(String(value)));
+        body.appendChild(line);
+      });
+      if (body.childNodes.length) details.appendChild(body);
+      container.appendChild(details);
+    });
+  };
+  const renderItems = state => {
+    const container = clear('work-items');
+    const items = Array.isArray(state.work_items) ? state.work_items : [];
+    if (!items.length) { container.appendChild(text('p', tr('empty'), 'empty')); return; }
+    items.slice().reverse().forEach(item => {
+      const parts = [item.owner, item.result, item.inputs, item.artifact ? 'Artifact: ' + item.artifact : ''].filter(Boolean);
+      const entry = row((item.id ? item.id + ' · ' : '') + (item.title || '—'), parts.join(' · '), item.status);
+      const checks = Array.isArray(item.acceptance_checks) ? item.acceptance_checks : [];
+      if (checks.length) {
+        const list = document.createElement('ul');
+        list.className = 'meta';
+        checks.forEach(check => list.appendChild(text('li', check)));
+        entry.querySelector('.row-main').appendChild(list);
+      }
+      container.appendChild(entry);
+    });
+  };
+  const renderChecks = state => {
+    const container = clear('checks');
+    const checks = Array.isArray(state.checks) ? state.checks : [];
+    if (!checks.length) { container.appendChild(text('p', tr('empty'), 'empty')); return; }
+    checks.slice().reverse().forEach(item => {
+      const details = [item.result, item.reason].filter(Boolean).join(' · ');
+      container.appendChild(row((item.id ? item.id + ' · ' : '') + (item.check_type || '—'), details, item.status));
+    });
+  };
+  const renderArtifacts = state => {
+    const container = clear('artifacts');
+    const items = [];
+    (Array.isArray(state.work_items) ? state.work_items : []).forEach(item => { if (item.artifact) items.push({name:item.artifact, from:item.title || item.id}); });
+    (Array.isArray(state.requirements) ? state.requirements : []).forEach(item => { if (item.artifact) items.push({name:item.artifact, from:item.id}); });
+    if (!items.length) { container.appendChild(text('p', tr('noArtifacts'), 'empty')); return; }
+    items.forEach(item => {
+      const entry = text('div', null, 'row');
+      const main = text('div', null, 'row-main');
+      main.appendChild(text('code', item.name, 'artifact-path'));
+      main.appendChild(text('div', interpolate(tr('artifactFrom'), {name:item.from}), 'meta'));
+      entry.appendChild(main);
+      container.appendChild(entry);
+    });
+  };
+  const renderActivity = state => {
+    const container = clear('activity');
+    const events = Array.isArray(state.events) ? state.events : [];
+    if (!events.length) { container.appendChild(text('p', tr('noActivity'), 'empty')); return; }
+    events.slice(-8).reverse().forEach(event => {
+      const title = event.label || event.title || event.id || event.type || 'Event';
+      const detail = event.summary || event.text || event.reason || event.note || event.status || '';
+      const entry = row(title, detail, null);
+      entry.appendChild(text('time', formatDate(event.timestamp), 'event-time'));
+      container.appendChild(entry);
+    });
+  };
+  const render = state => {
+    if (!state || typeof state !== 'object') throw new Error('Invalid run state');
+    current = state;
+    document.documentElement.lang = language;
+    setText('title', state.title || 'Autopilot run');
+    setText('run-id', interpolate(tr('stateTitle'), {id:state.run_id || '—'}));
+    const runStatus = $('run-status');
+    runStatus.textContent = statusLabel(state.status);
+    runStatus.className = 'badge ' + (safeStatuses.has(state.status) ? state.status : 'pending');
+    const checkpoint = state.checkpoint || {};
+    setText('checkpoint', (checkpoint.label || checkpoint.stage || tr('ready')) + (checkpoint.status ? ' · ' + statusLabel(checkpoint.status) : ''));
+    const progress = progressValue(state);
+    $('progress').setAttribute('aria-valuenow', String(progress.percent));
+    $('progress').setAttribute('aria-label', tr('progressBar'));
+    $('progress-fill').style.width = progress.percent + '%';
+    setText('progress-label', progress.total ? progress.percent + '%' : tr('notTracked'));
+    setText('progress-detail', progress.total ? interpolate(tr('trackedClosed'), {done:progress.done,total:progress.total}) : '');
+    setText('elapsed', formatDuration(elapsedSeconds(state)));
+    setText('waiting-time', formatDuration(totalWaitingSeconds(state)));
+    setText('revision', String(Number(state.revision) || 0));
+    const settings = clear('run-settings');
+    [['mode',state.mode],['depth',state.depth],['complexity',state.complexity],['risk',state.risk],['route',state.route],['updated',formatDate(state.updated_at)]].forEach(([key,value]) => {
+      const cell = text('div', null, 'setting');
+      cell.appendChild(text('span', tr(key)));
+      cell.appendChild(text('strong', settingValue(key,value)));
+      settings.appendChild(cell);
+    });
+    renderStages(state);
+    renderRequirements(state);
+    renderItems(state);
+    renderChecks(state);
+    renderArtifacts(state);
+    renderActivity(state);
+    const openWait = (Array.isArray(state.waiting_intervals) ? state.waiting_intervals : []).find(interval => !interval.ended_at);
+    $('waiting-panel').hidden = !openWait;
+    setText('waiting-reason', openWait ? openWait.reason : '');
+    setText('waiting-since', openWait ? interpolate(tr('waitingSince'), {time:formatDate(openWait.started_at)}) : '');
+    const isFinished = ['completed','failed','cancelled'].includes(state.status);
+    $('completion-panel').hidden = !isFinished && !state.completion_summary;
+    setText('completion-status', statusLabel(state.status));
+    setText('completion-summary', state.completion_summary || '');
+    refreshStaticLanguage();
+    refreshConnectionText();
+  };
+  const refreshStaticLanguage = () => {
+    document.querySelectorAll('[data-i18n]').forEach(element => {
+      const key = element.getAttribute('data-i18n');
+      element.textContent = tr(key);
+    });
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
+      element.setAttribute('placeholder', tr(element.getAttribute('data-i18n-placeholder')));
+    });
+    $('requirement-search').setAttribute('aria-label', tr('searchRequirements'));
+    $('requirement-filter').setAttribute('aria-label', tr('requirements'));
+    $('progress').setAttribute('aria-label', tr('progressBar'));
+    const languageButton = document.querySelector('[data-action="language"]');
+    languageButton.textContent = language.toUpperCase();
+    languageButton.setAttribute('data-lang', language);
+    languageButton.setAttribute('aria-label', language === 'en' ? 'Переключить язык' : 'Change language');
+    const themeButton = document.querySelector('[data-action="theme"]');
+    themeButton.textContent = tr('theme') + ': ' + themePreference;
+    themeButton.setAttribute('aria-label', language === 'en' ? 'Change color theme' : 'Изменить цветовую тему');
+    document.querySelector('[data-action="refresh"]').setAttribute('aria-label', language === 'en' ? 'Refresh run state' : 'Обновить состояние прогона');
+    const filter = $('requirement-filter');
+    [...filter.options].forEach(option => { option.textContent = tr(option.getAttribute('data-i18n')); });
+  };
+  const refreshConnectionText = () => {
+    const connection = $('connection');
+    if (lastCheckedAt) {
+      connection.textContent = tr('live');
+      connection.className = 'connection connected';
+      setText('last-poll', tr('lastChecked') + ' · ' + formatDate(lastCheckedAt));
+    } else {
+      connection.textContent = tr('snapshotWaiting');
+      connection.className = 'connection';
+      setText('last-poll', tr('lastState') + ' · ' + formatDate(current.updated_at));
+    }
+  };
+  const setPreference = (key, value) => {
+    try { localStorage.setItem('autopilot-anything-' + key, value); } catch (_) { /* Local storage is optional. */ }
+  };
+  const loadPreference = (key, fallback) => {
+    try { return localStorage.getItem('autopilot-anything-' + key) || fallback; } catch (_) { return fallback; }
+  };
+  const applyLanguage = value => {
+    language = value === 'ru' ? 'ru' : 'en';
+    document.documentElement.lang = language;
+    if (current) render(current);
+  };
+  const applyTheme = value => {
+    themePreference = ['light','dark','auto'].includes(value) ? value : 'auto';
+    if (themePreference === 'auto') document.body.removeAttribute('data-theme');
+    else document.body.dataset.theme = themePreference;
+    refreshStaticLanguage();
+  };
+  const markRefreshError = () => {
+    const connection = $('connection');
+    connection.textContent = tr('snapshot');
+    connection.className = 'connection disconnected';
+    const detail = $('connection-detail');
+    detail.hidden = false;
+    detail.classList.add('error');
+    detail.textContent = tr('refreshFailed') + ' ' + tr('lastState') + ' · ' + formatDate(current.updated_at);
+    setText('last-poll', tr('lastState') + ' · ' + formatDate(current.updated_at));
+  };
+  const refresh = async () => {
+    if (refreshRunning) return;
+    refreshRunning = true;
+    try {
+      const response = await fetch('/state.json', {cache: 'no-store', credentials: 'same-origin'});
+      if (!response.ok) throw new Error('state unavailable');
+      const next = await response.json();
+      if (!next || typeof next !== 'object' || next.schema_version !== 1 || typeof next.run_id !== 'string') throw new Error('invalid state shape');
+      render(next);
+      lastCheckedAt = new Date().toISOString();
+      $('connection-detail').hidden = true;
+      $('connection-detail').classList.remove('error');
+      refreshConnectionText();
+    } catch (_) {
+      markRefreshError();
+    } finally {
+      refreshRunning = false;
+    }
+  };
+  document.querySelector('[data-action="refresh"]').addEventListener('click', refresh);
+  document.querySelector('[data-action="language"]').addEventListener('click', () => {
+    const next = language === 'en' ? 'ru' : 'en';
+    setPreference('language', next);
+    applyLanguage(next);
+  });
+  document.querySelector('[data-action="theme"]').addEventListener('click', () => {
+    const next = themePreference === 'auto' ? 'dark' : themePreference === 'dark' ? 'light' : 'auto';
+    setPreference('theme', next);
+    applyTheme(next);
+  });
+  $('requirement-search').addEventListener('input', () => renderRequirements(current));
+  $('requirement-filter').addEventListener('change', () => renderRequirements(current));
+  language = loadPreference('language', 'en') === 'ru' ? 'ru' : 'en';
+  themePreference = loadPreference('theme', 'auto');
+  applyTheme(themePreference);
+  render(current);
+  refresh();
+  window.setInterval(refresh, 10000);
+  window.setInterval(() => {
+    if (current) {
+      setText('elapsed', formatDuration(elapsedSeconds(current)));
+      const stages = Array.isArray(current.stages) ? current.stages : [];
+      const currentStage = stages.find(stage => stage.status === 'active' || (current.status === 'waiting' && stage.id === (current.checkpoint || {}).stage));
+      if (currentStage) renderStages(current);
+      const updated = parseDate(current.updated_at);
+      const stateLooksQuiet = current.status === 'active' && updated !== null && Date.now() - updated > 120000;
+      const notice = $('stale-note');
+      notice.hidden = !stateLooksQuiet;
+      if (stateLooksQuiet) notice.textContent = tr('quietState') + ' ' + tr('lastState') + ' · ' + formatDate(current.updated_at);
+    }
+  }, 10000);
+})();
+</script>
+</body>
+</html>

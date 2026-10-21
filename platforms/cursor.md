@@ -24,6 +24,10 @@ Open Agent chat, type `/`, search for `autopilot-anything`, and select it. For a
 
 Cursor discovers skills when it starts. Reopen Cursor or its Agent session if a newly installed or updated skill does not appear. User-level skills stay on the local machine unless you enable Cursor's documented cloud sync or team publishing; project skills in the repository are available where that repository is checked out.
 
+## Per-run dashboard
+
+When Cursor runs the skill, it should invoke `scripts/dashboard.py` from the same installed folder as the loaded `SKILL.md`, and keep run state under the current project. If Cursor can maintain a background process and open its loopback URL, the tracker serves a read-only live page. If either capability is unavailable, generate and present the static snapshot. This is a best-effort path by analogy; Cursor has not been runtime-tested here. Follow the [shared dashboard lifecycle](../references/dashboard.md).
+
 ## Update
 
 For a user-level clone:

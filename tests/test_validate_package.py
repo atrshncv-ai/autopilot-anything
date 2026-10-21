@@ -2,11 +2,16 @@
 
 from __future__ import annotations
 
+import importlib.util
+import json
+import re
 import shutil
 import subprocess
 import sys
 import tempfile
+import threading
 import unittest
+import urllib.request
 from pathlib import Path
 
 
@@ -222,6 +227,101 @@ class ValidatePackageTests(unittest.TestCase):
 
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("autopilot-anything", result.stderr)
+
+    def test_dashboard_lifecycle_files_are_required(self) -> None:
+        required_dashboard_files = (
+            "dashboard.html",
+            "scripts/dashboard.py",
+            "references/dashboard.md",
+            "tests/test_dashboard.py",
+            "tests/test_dashboard_ui.py",
+            "platforms/codex.md",
+            "platforms/claude-code.md",
+            "platforms/cursor.md",
+        )
+        for relative_path in required_dashboard_files:
+            with self.subTest(relative_path=relative_path), tempfile.TemporaryDirectory() as temporary_directory:
+                package_root = self.copy_package(Path(temporary_directory))
+                target = package_root / relative_path
+                if not target.exists():
+                    target.parent.mkdir(parents=True, exist_ok=True)
+                    target.write_text("placeholder\n", encoding="utf-8")
+                target.unlink()
+
+                result = self.run_validator(package_root)
+
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn(relative_path, result.stderr)
+
+    def test_installed_package_template_drives_live_page_and_snapshot_after_event_eviction(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            temp_root = Path(temporary_directory)
+            package_root = self.copy_package(temp_root)
+            dashboard_path = package_root / "scripts" / "dashboard.py"
+            module_spec = importlib.util.spec_from_file_location("dashboard_installed_copy", dashboard_path)
+            self.assertIsNotNone(module_spec)
+            self.assertIsNotNone(module_spec.loader)
+            installed_dashboard = importlib.util.module_from_spec(module_spec)
+            sys.modules[module_spec.name] = installed_dashboard
+            try:
+                module_spec.loader.exec_module(installed_dashboard)
+                packaged_template = (package_root / "dashboard.html").read_text(encoding="utf-8")
+                self.assertEqual(installed_dashboard.DEFAULT_TEMPLATE, packaged_template)
+                self.assertEqual(installed_dashboard.DASHBOARD_TEMPLATE_PATH, (package_root / "dashboard.html").resolve())
+                default_state = installed_dashboard.create_run_state("default-settings")
+                self.assertEqual(default_state["mode"], "semi")
+                self.assertEqual(default_state["depth"], "normal")
+                init_defaults = installed_dashboard.build_parser().parse_args(["init", "--project-root", str(temp_root)])
+                self.assertEqual(init_defaults.mode, "semi")
+                self.assertEqual(init_defaults.depth, "normal")
+
+                project_root = temp_root / "user-project"
+                state = installed_dashboard.create_run_state("integration-run", timestamp="2026-01-01T00:00:00Z")
+                state = installed_dashboard.apply_event(state, {
+                    "type": "stage", "id": "execution", "label": "Create deliverable", "status": "active",
+                    "timestamp": "2026-01-01T00:02:00Z",
+                })
+                for _ in range(205):
+                    state = installed_dashboard.apply_event(state, {
+                        "type": "note", "text": "Progress update", "timestamp": "2026-01-01T00:03:00Z",
+                    })
+                self.assertFalse(any(event["type"] == "stage" for event in state["events"]))
+                installed_dashboard.save_run(project_root, "integration-run", state)
+
+                server = installed_dashboard.DashboardServer(project_root, "integration-run", port=0)
+                server_thread = threading.Thread(target=server.serve_forever, daemon=True)
+                server_thread.start()
+                try:
+                    host, port = server.server_address[:2]
+                    with urllib.request.urlopen(f"http://{host}:{port}/", timeout=2) as response:
+                        live_page = response.read().decode("utf-8")
+                    with urllib.request.urlopen(f"http://{host}:{port}/state.json", timeout=2) as response:
+                        live_state = json.loads(response.read().decode("utf-8"))
+
+                    snapshot_path = temp_root / "snapshot.html"
+                    result = installed_dashboard.main([
+                        "snapshot", "--project-root", str(project_root), "--run-id", "integration-run",
+                        "--output", str(snapshot_path),
+                    ])
+                    self.assertEqual(result, 0)
+                    snapshot_page = snapshot_path.read_text(encoding="utf-8")
+                finally:
+                    server.shutdown()
+                    server.server_close()
+                    server_thread.join(timeout=2)
+            finally:
+                sys.modules.pop(module_spec.name, None)
+
+        embedded_match = re.search(
+            r'<script\s+id="initial-state"\s+type="application/json">(.*?)</script>', live_page, re.DOTALL,
+        )
+        self.assertIsNotNone(embedded_match)
+        embedded_state = json.loads(embedded_match.group(1))
+        self.assertEqual(live_page, snapshot_page)
+        self.assertEqual(live_state["revision"], embedded_state["revision"])
+        self.assertEqual(live_state["current_stage_started_at"], "2026-01-01T00:02:00Z")
+        self.assertEqual(embedded_state["current_stage_started_at"], live_state["current_stage_started_at"])
+        self.assertIn("state.current_stage_started_at", live_page)
 
 
 if __name__ == "__main__":

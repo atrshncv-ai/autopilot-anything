@@ -24,6 +24,10 @@ Start Claude Code in the project, type `/` and select `/autopilot-anything`, or 
 
 Claude Code watches existing skill directories for changes. If you create the top-level `.claude/skills/` or `~/.claude/skills/` directory while a session is already open, run `/reload-skills`; otherwise restart the session if the new skill is not listed.
 
+## Per-run dashboard
+
+When Claude Code runs the skill, it should invoke `scripts/dashboard.py` from the same installed folder as the loaded `SKILL.md`, and keep run state under the current project. If the host can maintain a background process and open its loopback URL, the tracker serves a read-only live page. If either capability is unavailable, generate and present the static snapshot. This is a best-effort path by analogy; Claude Code has not been runtime-tested here. Follow the [shared dashboard lifecycle](../references/dashboard.md).
+
 ## Update
 
 For a personal clone:

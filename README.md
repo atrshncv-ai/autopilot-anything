@@ -8,6 +8,10 @@ The target public repository for this standalone package is [atrshncv-ai/autopil
 
 The skill supplies instructions, reference material, and a package validator. It does not include an MCP server, browser, file editor, connector, credentials, or other execution service. Whether an agent can search the web, edit files, inspect a document, or act in an external service depends on the tools and permissions available in that runtime. Actions such as sending, publishing, purchasing, or deleting still require the safeguards of the host environment. Other platforms are best-effort; only Codex, Claude Code, and Cursor have dedicated installation guides here.
 
+## Run dashboard
+
+Every run gets project-local state under `.autopilot/anything/<run-id>/`. The skill starts the tracker from its installed package and opens a loopback-only, read-only dashboard when the host supports it. The tracker also writes a standalone `snapshot.html` for use without a local server. The page shows stages, gates, requirements, work items, checks, wait time, and recent activity; it cannot change run state. See the [dashboard lifecycle and launch instructions](references/dashboard.md).
+
 ## What it preserves and changes
 
 Autopilot Anything preserves the source Autopilot's verbatim brief, requirement ledger, adaptive interview, progress and resume point, and acceptance against the original brief. It replaces coding-centered file tickets, implementation waves, and test-count gates with route-aware work items and checks chosen for the deliverable: evidence and source checks for research, reproducible calculations for data, rendered layout review for documents and slides, and project checks for code. The three workflow levels are based on complexity; risk and irreversibility are assessed separately and can add safeguards at any level.

@@ -28,7 +28,9 @@ REQUIRED_PLATFORM_GUIDES = (
 )
 REQUIRED_FILES = (
     "SKILL.md",
+    "dashboard.html",
     "references/core-workflow.md",
+    "references/dashboard.md",
     "references/safety-and-evidence.md",
     "references/route-index.md",
     *REQUIRED_ROUTES,
@@ -41,13 +43,19 @@ REQUIRED_FILES = (
     "compatibility/codex.md",
     "compatibility/claude-code.md",
     "compatibility/cursor.md",
+    "scripts/dashboard.py",
     "scripts/validate_package.py",
+    "tests/test_dashboard.py",
+    "tests/test_dashboard_ui.py",
+    "tests/test_validate_package.py",
 )
 REQUIRED_SKILL_LINKS = (
     "references/core-workflow.md",
+    "references/dashboard.md",
     "references/safety-and-evidence.md",
     "references/route-index.md",
 )
+REQUIRED_DASHBOARD_DOC = "references/dashboard.md"
 MARKDOWN_LINK = re.compile(r"!?[\[][^\]]*\]\(\s*(?:<([^>]+)>|([^\s)]+))")
 SECRET_PATTERNS = (
     (re.compile(r"\b(?:AKIA|ASIA)[0-9A-Z]{16}\b"), "AWS access key"),
@@ -234,6 +242,31 @@ def validate_required_links(root: Path, errors: List[str]) -> None:
                 if (root / target).resolve() not in linked_paths:
                     errors.append(f"{target} is not linked from references/route-index.md.")
 
+    core_workflow = root / "references" / "core-workflow.md"
+    if core_workflow.is_file():
+        text = read_utf8(core_workflow, root, errors)
+        if text is not None:
+            linked_paths = {
+                local_link_path(core_workflow, target, root, errors)
+                for target in markdown_targets(text)
+            }
+            if (root / REQUIRED_DASHBOARD_DOC).resolve() not in linked_paths:
+                errors.append("references/core-workflow.md must link to references/dashboard.md.")
+
+    for guide_name in REQUIRED_PLATFORM_GUIDES:
+        guide = root / guide_name
+        if not guide.is_file():
+            continue
+        text = read_utf8(guide, root, errors)
+        if text is None:
+            continue
+        linked_paths = {
+            local_link_path(guide, target, root, errors)
+            for target in markdown_targets(text)
+        }
+        if (root / REQUIRED_DASHBOARD_DOC).resolve() not in linked_paths:
+            errors.append(f"{guide_name} must link to references/dashboard.md.")
+
     for readme_name in ("README.md", "README.ru.md"):
         readme = root / readme_name
         if not readme.is_file():
@@ -250,6 +283,10 @@ def validate_required_links(root: Path, errors: List[str]) -> None:
         for guide in REQUIRED_PLATFORM_GUIDES:
             if (root / guide).resolve() not in linked_paths:
                 errors.append(f"{readme_name} must link to {guide}.")
+        if (root / REQUIRED_DASHBOARD_DOC).resolve() not in linked_paths:
+            errors.append(f"{readme_name} must link to {REQUIRED_DASHBOARD_DOC}.")
+        if "dashboard" not in text.casefold() or "snapshot" not in text.casefold():
+            errors.append(f"{readme_name} must briefly explain the dashboard and static snapshot.")
 
 
 def is_private_path(path: Path) -> bool:

@@ -32,3 +32,7 @@ python3 -m unittest discover -s tests -p 'test_*.py'
 ```
 
 These commands verify package contents and validator behavior. They do not launch Codex, Claude Code, or Cursor.
+
+## Deferred checks
+
+The dashboard release does not change the prior Codex behavioral-smoke result: installation and discovery were observed, while behavior cases remain unverified because inference was blocked before a response. Two previously identified package-validator edge cases also remain deferred as separate follow-up tasks. Dashboard-specific coverage added here is not evidence that either deferred validator edge is fixed, and no compatibility result should be changed without a fresh observed run.

@@ -26,6 +26,12 @@ Codex detects skill changes automatically. If the skill does not appear, restart
 
 See the [recorded Codex compatibility results](../compatibility/codex.md). The 2026-10-21 check confirmed isolated installation and skill discovery with Codex CLI 0.142.5; execution smoke cases remain unverified because the account rejected the available model IDs.
 
+## Per-run dashboard
+
+Each skill run uses the tracker shipped in the same installed skill folder as `SKILL.md`. Resolve `SKILL_DIR` to the actual folder Codex loaded; do not run a helper from a different source checkout. For example, a user-level installation may be under `~/.agents/skills/autopilot-anything/` or the configured Codex skills directory; a project installation is under `<repo>/.agents/skills/autopilot-anything/`.
+
+The skill initializes a project-local run and snapshot with `python3 "$SKILL_DIR/scripts/dashboard.py"`, then starts its read-only loopback server in the background when Codex can keep it alive and open the local URL. Otherwise it presents `.autopilot/anything/<run-id>/snapshot.html` and reports that live refresh is unavailable. State updates come from tracker commands, not dashboard controls. See the [shared lifecycle and command reference](../references/dashboard.md).
+
 ## Update
 
 For a user-level clone:

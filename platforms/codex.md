@@ -4,10 +4,12 @@ Codex skills are folders with a `SKILL.md` and optional supporting files. This p
 
 ## Install
 
-For your account, clone the standalone repository directly into Codex's user-level skills directory:
+For your account, clone the standalone repository into Codex's user-level skills directory. The default Codex state directory is `~/.codex`; if you set `CODEX_HOME`, the skill goes under that directory instead:
 
 ```sh
-git clone https://github.com/atrshncv-ai/autopilot-anything.git "$HOME/.agents/skills/autopilot-anything"
+SKILLS_DIR="${CODEX_HOME:-$HOME/.codex}/skills"
+mkdir -p "$SKILLS_DIR"
+git clone https://github.com/atrshncv-ai/autopilot-anything.git "$SKILLS_DIR/autopilot-anything"
 ```
 
 For one project, run this from the project root to add the skill as a submodule:
@@ -28,7 +30,7 @@ See the [recorded Codex compatibility results](../compatibility/codex.md). The 2
 
 ## Per-run dashboard
 
-Each skill run uses the tracker shipped in the same installed skill folder as `SKILL.md`. Resolve `SKILL_DIR` to the actual folder Codex loaded; do not run a helper from a different source checkout. For example, a user-level installation may be under `~/.agents/skills/autopilot-anything/` or the configured Codex skills directory; a project installation is under `<repo>/.agents/skills/autopilot-anything/`.
+Each skill run uses the tracker shipped in the same installed skill folder as `SKILL.md`. Resolve `SKILL_DIR` to the actual folder Codex loaded; do not run a helper from a different source checkout. A user-level installation is under `${CODEX_HOME:-$HOME/.codex}/skills/autopilot-anything/`; a project installation is under `<repo>/.agents/skills/autopilot-anything/`.
 
 The skill initializes a project-local run and snapshot with `python3 "$SKILL_DIR/scripts/dashboard.py"`, then starts its read-only loopback server in the background when Codex can keep it alive and open the local URL. Otherwise it presents `.autopilot/anything/<run-id>/snapshot.html` and reports that live refresh is unavailable. State updates come from tracker commands, not dashboard controls. See the [shared lifecycle and command reference](../references/dashboard.md).
 
@@ -37,7 +39,7 @@ The skill initializes a project-local run and snapshot with `python3 "$SKILL_DIR
 For a user-level clone:
 
 ```sh
-git -C "$HOME/.agents/skills/autopilot-anything" pull --ff-only
+git -C "${CODEX_HOME:-$HOME/.codex}/skills/autopilot-anything" pull --ff-only
 ```
 
 For a project submodule, run from the project root, then commit the updated submodule pointer if you want teammates to receive the update:
@@ -53,7 +55,7 @@ For copied files, replace the complete `.agents/skills/autopilot-anything/` dire
 Remove a user-level clone with:
 
 ```sh
-rm -rf -- "$HOME/.agents/skills/autopilot-anything"
+rm -rf -- "${CODEX_HOME:-$HOME/.codex}/skills/autopilot-anything"
 ```
 
 To remove a project submodule from the project root:
@@ -68,4 +70,6 @@ To remove a copied project-level skill, delete `<repo>/.agents/skills/autopilot-
 ## Sources
 
 - [OpenAI: Skills](https://developers.openai.com/plugins/concepts/skills) — folder and `SKILL.md` format, activation, and the boundary between skill instructions and tools.
+- [Codex best practices](https://learn.chatgpt.com/docs/learn/best-practices) — personal and repository skill directories.
+- [Testing Agent Skills systematically](https://developers.openai.com/blog/eval-skills) — example of a user-scoped skill under `~/.codex/skills/`.
 - [OpenAI: Build skills](https://learn.chatgpt.com/docs/build-skills) — current Codex user/project locations, `$` invocation, detection, and refresh behavior.

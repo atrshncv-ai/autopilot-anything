@@ -1,0 +1,126 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="1100" viewBox="0 0 1280 1100" role="img" aria-labelledby="title desc">
+  <title id="title">Illustrative Autopilot Anything dashboard preview</title>
+  <desc id="desc">A sample research run in the read-only dashboard, showing workflow progress, settings, stages, gates, requirements, work items, and checks.</desc>
+  <defs>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%"><feDropShadow dx="0" dy="5" stdDeviation="8" flood-color="#153033" flood-opacity=".055"/></filter>
+    <style>
+      .ink{fill:#172d34;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+      .muted{fill:#62757b;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+      .eyebrow{fill:#176c69;font:700 11px Inter,ui-sans-serif,system-ui,sans-serif;letter-spacing:1.4px}
+      .heading{fill:#172d34;font:700 17px Inter,ui-sans-serif,system-ui,sans-serif}
+      .body{fill:#172d34;font:600 13px Inter,ui-sans-serif,system-ui,sans-serif}
+      .small{fill:#62757b;font:500 11px Inter,ui-sans-serif,system-ui,sans-serif}
+      .tiny{fill:#62757b;font:700 9px Inter,ui-sans-serif,system-ui,sans-serif;letter-spacing:.7px}
+      .card{fill:#fff;stroke:#d4e0df;stroke-width:1}
+      .rule{stroke:#e2e9e8;stroke-width:1}
+    </style>
+  </defs>
+  <rect width="1280" height="1100" rx="20" fill="#eef3f3"/>
+  <rect x="1" y="1" width="1278" height="1098" rx="19" fill="none" stroke="#d4e0df"/>
+
+  <!-- Header -->
+  <text x="48" y="38" class="eyebrow">AUTOPILOT ANYTHING · RUN DASHBOARD</text>
+  <text x="48" y="70" class="ink" font-size="25" font-weight="750" letter-spacing="-.6">Renewable energy market brief</text>
+  <text x="48" y="94" class="small">research-preview · sample run</text>
+  <rect x="1060" y="37" width="80" height="31" rx="8" fill="#fff" stroke="#d4e0df"/>
+  <text x="1100" y="57" class="body" text-anchor="middle" font-size="11">Refresh</text>
+  <rect x="1149" y="37" width="82" height="31" rx="8" fill="#fff" stroke="#d4e0df"/>
+  <text x="1190" y="57" class="body" text-anchor="middle" font-size="11">Theme · EN</text>
+  <rect x="48" y="108" width="175" height="27" rx="8" fill="#fff" stroke="#b5d6ce"/>
+  <circle cx="62" cy="121" r="4" fill="#176c69"/>
+  <text x="74" y="125" class="small" fill="#176c69">Live dashboard connected</text>
+  <text x="1232" y="125" class="small" text-anchor="end">Updated just now</text>
+
+  <!-- Overview -->
+  <rect x="48" y="151" width="754" height="215" rx="13" class="card" filter="url(#shadow)"/>
+  <text x="70" y="181" class="eyebrow">CURRENT STATE</text>
+  <text x="70" y="208" class="muted" font-size="13">Work</text>
+  <rect x="702" y="168" width="76" height="25" rx="7" fill="#e8f4f1" stroke="#b5d6ce"/>
+  <text x="740" y="185" class="eyebrow" text-anchor="middle" font-size="10" letter-spacing=".3">ACTIVE</text>
+  <text x="70" y="240" class="body">Workflow progress</text>
+  <text x="778" y="240" class="body" text-anchor="end">59%</text>
+  <rect x="70" y="252" width="708" height="8" rx="4" fill="#f0f4f3"/>
+  <rect x="70" y="252" width="418" height="8" rx="4" fill="#176c69"/>
+  <text x="70" y="280" class="small">4 of 7 stages completed · Working on the research summary</text>
+  <line x1="70" y1="298" x2="778" y2="298" class="rule"/>
+  <text x="70" y="326" class="ink" font-size="18" font-weight="700">54m</text>
+  <text x="70" y="346" class="tiny">WORKING TIME</text>
+  <text x="190" y="326" class="ink" font-size="18" font-weight="700">8m</text>
+  <text x="190" y="346" class="tiny">WAITING TIME</text>
+  <text x="310" y="326" class="ink" font-size="18" font-weight="700">14</text>
+  <text x="310" y="346" class="tiny">REVISION</text>
+
+  <rect x="816" y="151" width="416" height="215" rx="13" class="card" filter="url(#shadow)"/>
+  <text x="840" y="181" class="heading">Run settings</text>
+  <text x="840" y="212" class="tiny">MODE</text><text x="840" y="231" class="body">semi</text>
+  <text x="1030" y="212" class="tiny">DEPTH</text><text x="1030" y="231" class="body">deep</text>
+  <line x1="840" y1="242" x2="1208" y2="242" class="rule"/>
+  <text x="840" y="264" class="tiny">COMPLEXITY</text><text x="840" y="283" class="body">complex</text>
+  <text x="1030" y="264" class="tiny">RISK</text><text x="1030" y="283" class="body">low</text>
+  <line x1="840" y1="294" x2="1208" y2="294" class="rule"/>
+  <text x="840" y="316" class="tiny">ROUTE</text><text x="840" y="337" class="body">scientific-research</text>
+  <text x="1030" y="316" class="tiny">STATUS</text><text x="1030" y="337" class="body" fill="#176c69">In progress</text>
+
+  <!-- Stages -->
+  <rect x="48" y="382" width="614" height="321" rx="13" class="card" filter="url(#shadow)"/>
+  <text x="72" y="414" class="heading">Stages and gates</text>
+  <text x="72" y="446" class="small">Brief</text><rect x="530" y="429" width="105" height="22" rx="6" fill="#e8f4f1"/><text x="582" y="444" class="eyebrow" text-anchor="middle" font-size="9" letter-spacing=".3">COMPLETED</text>
+  <line x1="72" y1="460" x2="638" y2="460" class="rule"/>
+  <text x="72" y="483" class="small">Requirements</text><rect x="530" y="466" width="105" height="22" rx="6" fill="#e8f4f1"/><text x="582" y="481" class="eyebrow" text-anchor="middle" font-size="9" letter-spacing=".3">COMPLETED</text>
+  <line x1="72" y1="497" x2="638" y2="497" class="rule"/>
+  <text x="72" y="520" class="small">Specification</text><rect x="530" y="503" width="105" height="22" rx="6" fill="#e8f4f1"/><text x="582" y="518" class="eyebrow" text-anchor="middle" font-size="9" letter-spacing=".3">COMPLETED</text>
+  <line x1="72" y1="534" x2="638" y2="534" class="rule"/>
+  <text x="72" y="557" class="small">Plan</text><rect x="530" y="540" width="105" height="22" rx="6" fill="#e8f4f1"/><text x="582" y="555" class="eyebrow" text-anchor="middle" font-size="9" letter-spacing=".3">COMPLETED</text>
+  <line x1="72" y1="571" x2="638" y2="571" class="rule"/>
+  <text x="72" y="594" class="body">Work</text><rect x="530" y="577" width="105" height="22" rx="6" fill="#e8f4f1"/><text x="582" y="592" class="eyebrow" text-anchor="middle" font-size="9" letter-spacing=".3">ACTIVE</text>
+  <line x1="72" y1="608" x2="638" y2="608" class="rule"/>
+  <text x="72" y="631" class="small">Review</text><text x="582" y="631" class="small" text-anchor="middle">Pending</text>
+  <line x1="72" y1="645" x2="638" y2="645" class="rule"/>
+  <g transform="translate(72 660)">
+    <rect width="130" height="31" rx="7" fill="#e8f4f1"/><text x="65" y="13" class="eyebrow" text-anchor="middle" font-size="9" letter-spacing=".4">G1 · PASSED</text><text x="65" y="25" class="tiny" text-anchor="middle">Brief</text>
+    <rect x="142" width="130" height="31" rx="7" fill="#e8f4f1"/><text x="207" y="13" class="eyebrow" text-anchor="middle" font-size="9" letter-spacing=".4">G2 · PASSED</text><text x="207" y="25" class="tiny" text-anchor="middle">Requirements</text>
+    <rect x="284" width="130" height="31" rx="7" fill="#f6f9f8" stroke="#d4e0df"/><text x="349" y="13" class="tiny" text-anchor="middle">G3 · PENDING</text><text x="349" y="25" class="tiny" text-anchor="middle">Plan</text>
+    <rect x="426" width="130" height="31" rx="7" fill="#f6f9f8" stroke="#d4e0df"/><text x="491" y="13" class="tiny" text-anchor="middle">G4 · PENDING</text><text x="491" y="25" class="tiny" text-anchor="middle">Acceptance</text>
+  </g>
+
+  <!-- Requirements -->
+  <rect x="676" y="382" width="556" height="321" rx="13" class="card" filter="url(#shadow)"/>
+  <text x="700" y="414" class="heading">Requirements</text>
+  <rect x="700" y="430" width="508" height="30" rx="7" fill="#f6f9f8" stroke="#d4e0df"/>
+  <text x="714" y="449" class="small">Search requirements</text><text x="1189" y="449" class="small" text-anchor="end">All requirements ▾</text>
+  <text x="700" y="490" class="body"><tspan class="muted">R01</tspan><tspan dx="8">Use current primary sources</tspan></text>
+  <rect x="1118" y="472" width="90" height="22" rx="6" fill="#e8f4f1"/><text x="1163" y="487" class="eyebrow" text-anchor="middle" font-size="9" letter-spacing=".2">SATISFIED</text>
+  <text x="700" y="512" class="small">Evidence-first research · required in the final brief</text>
+  <line x1="700" y1="527" x2="1208" y2="527" class="rule"/>
+  <text x="700" y="556" class="body"><tspan class="muted">R02</tspan><tspan dx="8">Compare three regional markets</tspan></text>
+  <rect x="1118" y="538" width="90" height="22" rx="6" fill="#e8f4f1"/><text x="1163" y="553" class="eyebrow" text-anchor="middle" font-size="9" letter-spacing=".2">SATISFIED</text>
+  <text x="700" y="578" class="small">Keep the criteria consistent across all regions</text>
+  <line x1="700" y1="593" x2="1208" y2="593" class="rule"/>
+  <text x="700" y="622" class="body"><tspan class="muted">R03</tspan><tspan dx="8">Separate evidence from forecasts</tspan></text>
+  <rect x="1100" y="604" width="108" height="22" rx="6" fill="#fff5e5"/><text x="1154" y="619" fill="#99611b" font-size="9" font-weight="700" text-anchor="middle">IN PROGRESS</text>
+  <text x="700" y="644" class="small">Label estimates and disclose their assumptions</text>
+  <text x="700" y="681" class="tiny">3 REQUIREMENTS · 2 SATISFIED · 1 IN PROGRESS</text>
+
+  <!-- Work items and checks -->
+  <rect x="48" y="719" width="614" height="204" rx="13" class="card" filter="url(#shadow)"/>
+  <text x="72" y="751" class="heading">Work items</text>
+  <text x="72" y="784" class="body">Collect and verify sources</text><text x="72" y="804" class="small">Research route · primary sources checked</text>
+  <rect x="530" y="770" width="105" height="22" rx="6" fill="#e8f4f1"/><text x="582" y="785" class="eyebrow" text-anchor="middle" font-size="9" letter-spacing=".3">COMPLETED</text>
+  <line x1="72" y1="818" x2="638" y2="818" class="rule"/>
+  <text x="72" y="846" class="body">Draft comparison and caveats</text><text x="72" y="866" class="small">Research route · evidence and forecasts separated</text>
+  <rect x="530" y="832" width="105" height="22" rx="6" fill="#e8f4f1"/><text x="582" y="847" class="eyebrow" text-anchor="middle" font-size="9" letter-spacing=".3">ACTIVE</text>
+  <text x="72" y="900" class="tiny">2 WORK ITEMS · 1 COMPLETE · 1 ACTIVE</text>
+
+  <rect x="676" y="719" width="556" height="204" rx="13" class="card" filter="url(#shadow)"/>
+  <text x="700" y="751" class="heading">Checks</text>
+  <text x="700" y="784" class="body">Source review</text><text x="700" y="804" class="small">Every key claim links to a source</text>
+  <rect x="1118" y="770" width="90" height="22" rx="6" fill="#e8f4f1"/><text x="1163" y="785" class="eyebrow" text-anchor="middle" font-size="9" letter-spacing=".3">PASSED</text>
+  <line x1="700" y1="818" x2="1208" y2="818" class="rule"/>
+  <text x="700" y="847" class="small">Final review will check citations, assumptions, and coverage.</text>
+  <text x="700" y="900" class="tiny">1 CHECK RECORDED</text>
+
+  <!-- Footer -->
+  <text x="48" y="965" class="eyebrow">EXAMPLE RUN · ILLUSTRATIVE PREVIEW</text>
+  <text x="48" y="988" class="small">Read-only view · state is updated by the Autopilot run.</text>
+  <text x="1232" y="988" class="small" text-anchor="end">Stages · decisions · requirements · work · checks</text>
+</svg>
